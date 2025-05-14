@@ -10,9 +10,9 @@ public class SortingAlgorithms extends GraphicsProgram {
     public GLabel title;
     public NumberSquare[] squares = new NumberSquare[numSquares];
     int speed = 10;
-    int defaultSpeed = Math.max(40/numSquares,1);
-    public static int numSquares = 15;
-    boolean doSlowSorts = true;
+    int defaultSpeed = Math.max(2000/numSquares,1);
+    public static int numSquares = 31;
+    boolean doSlowSorts = false;
     @Override
     public void run() {
         for (int i = 0; i < numSquares; i++) {
@@ -226,6 +226,27 @@ public class SortingAlgorithms extends GraphicsProgram {
         if (start>=end){
             return;
         }
+        if (end-start > 4){
+            int medianIndex;
+            if (compareInPlace(squares[start],squares[start+1])) {                   // 1st comparison
+                if (compareInPlace(squares[start+1],squares[start+2])) {               // 2nd comparison
+                    medianIndex = start+1;       // v1 < v2 < v3
+                } else if (compareInPlace(squares[start],squares[start+2])) {        // 3rd comparison
+                    medianIndex = start+2;       // v1 < v3 ≤ v2
+                } else {
+                    medianIndex = start;       // v3 ≤ v1 < v2
+                }
+            } else {                         // v2 ≤ v1
+                if (compareInPlace(squares[start],squares[start+2])) {               // 2nd comparison in this branch
+                    medianIndex = start;       // v2 ≤ v1 < v3
+                } else if (compareInPlace(squares[start+1],squares[start+2])) {        // 3rd comparison
+                    medianIndex = start+2;       // v2 < v3 ≤ v1
+                } else {
+                    medianIndex = start+1;       // v3 ≤ v2 ≤ v1
+                }
+            }
+            swap(start,medianIndex);
+        }
         NumberSquare compareSquare = new NumberSquare(squares[start].value);
         add(compareSquare,squares[start].getX(),squares[start].getY() + squares[start].getHeight() * 5/3.0);
         int midIndex = start;
@@ -242,7 +263,7 @@ public class SortingAlgorithms extends GraphicsProgram {
                 squares[i].setColor(Color.yellow);
             }
         }
-        pause(speed*100);
+        pause(speed);
         for (int i = start; i <= end; i++) {
             squares[i].setColor(Color.white);
         }
@@ -306,7 +327,7 @@ public class SortingAlgorithms extends GraphicsProgram {
     public void shuffle(){
         title.setLabel("Shuffling...");
         add(title,getWidth()/2-title.getWidth()/2,100);
-        speed = 1;
+        speed = 50;
         for (int i = 0; i < squares.length; i++) {
             swap(i, (int) (Math.random() * squares.length));
         }
@@ -324,15 +345,29 @@ public class SortingAlgorithms extends GraphicsProgram {
         GPoint centerPoint = new GPoint((pos1.getX() + pos2.getX())/2,(pos1.getY()+pos2.getY())/2);
         double distanceToCenter = Math.sqrt((pos1.getX()-centerPoint.getX())*(pos1.getX()-centerPoint.getX()) + (pos1.getY()-centerPoint.getY())*(pos1.getY()-centerPoint.getY()));
         double currentDegrees = Math.atan2(pos1.getY()-centerPoint.getY(),pos1.getX()-centerPoint.getX());
-        for (int i = 0; i < 100; i++) {
-            double newDegrees = currentDegrees + (Math.PI * i / 100);
-            double x1 = centerPoint.getX() + (distanceToCenter * Math.cos(newDegrees));
-            double y1 = centerPoint.getY() + (distanceToCenter * Math.sin(newDegrees));
-            double x2 = centerPoint.getX() - (distanceToCenter * Math.cos(newDegrees));
-            double y2 = centerPoint.getY() - (distanceToCenter * Math.sin(newDegrees));
-            n1.setLocation(x1,y1);
-            n2.setLocation(x2,y2);
-            pause(speed);
+        if (speed > 100) {
+            for (int i = 0; i < 100; i++) {
+                double newDegrees = currentDegrees + (Math.PI * i / 100);
+                double x1 = centerPoint.getX() + (distanceToCenter * Math.cos(newDegrees));
+                double y1 = centerPoint.getY() + (distanceToCenter * Math.sin(newDegrees));
+                double x2 = centerPoint.getX() - (distanceToCenter * Math.cos(newDegrees));
+                double y2 = centerPoint.getY() - (distanceToCenter * Math.sin(newDegrees));
+                n1.setLocation(x1, y1);
+                n2.setLocation(x2, y2);
+                pause((double) speed /100);
+            }
+        }
+        else{
+            for (int i = 0; i < speed; i++) {
+                double newDegrees = currentDegrees + (Math.PI * i / speed);
+                double x1 = centerPoint.getX() + (distanceToCenter * Math.cos(newDegrees));
+                double y1 = centerPoint.getY() + (distanceToCenter * Math.sin(newDegrees));
+                double x2 = centerPoint.getX() - (distanceToCenter * Math.cos(newDegrees));
+                double y2 = centerPoint.getY() - (distanceToCenter * Math.sin(newDegrees));
+                n1.setLocation(x1, y1);
+                n2.setLocation(x2, y2);
+                pause(1);
+            }
         }
         n1.setLocation(pos2);
         n2.setLocation(pos1);
@@ -350,7 +385,7 @@ public class SortingAlgorithms extends GraphicsProgram {
             moving.setColor(Color.red);
             stationary.setColor(Color.green);
         }
-        pause(speed*100);
+        pause(speed);
         moving.setColor(Color.white);
         stationary.setColor(Color.white);
         return moving.value > stationary.value;
@@ -364,15 +399,23 @@ public class SortingAlgorithms extends GraphicsProgram {
            n1.setColor(Color.red);
            n2.setColor(Color.green);
        }
-       pause(speed*100);
+       pause(speed);
         n1.setColor(Color.white);
         n2.setColor(Color.white);
        return n1.value > n2.value;
     }
     public void move(NumberSquare toMove, GPoint pos1, GPoint pos2){
-        for (int i = 0; i < 50; i++) {
-            toMove.setLocation(pos1.getX() + ((pos2.getX() - pos1.getX()) * i / 50.0),pos1.getY() + ((pos2.getY() - pos1.getY()) * i / 50.0));
-            pause(speed);
+        if (speed > 50) {
+            for (int i = 0; i < 50; i++) {
+                toMove.setLocation(pos1.getX() + ((pos2.getX() - pos1.getX()) * i / 50.0), pos1.getY() + ((pos2.getY() - pos1.getY()) * i / 50.0));
+                pause(speed/50.0);
+            }
+        }
+        else{
+            for (int i = 0; i < speed; i++) {
+                toMove.setLocation(pos1.getX() + ((pos2.getX() - pos1.getX()) * i / 50.0), pos1.getY() + ((pos2.getY() - pos1.getY()) * i / 50.0));
+                pause(1);
+            }
         }
         toMove.setLocation(pos2);
     }
@@ -381,11 +424,24 @@ public class SortingAlgorithms extends GraphicsProgram {
         for (int i = 0; i < toMove.length; i++) {
             originalPoses[i] = toMove[i].getLocation();
         }
-        for (int i = 0; i < 50; i++) {
-            for (int j = 0; j < toMove.length; j++) {
-                toMove[j].setLocation(originalPoses[j].getX() + (difference.getX() * i / 50.0),originalPoses[j].getY() + (difference.getY() * i / 50.0));
+        if (speed > 50) {
+            for (int i = 0; i < 50; i++) {
+                for (int j = 0; j < toMove.length; j++) {
+                    toMove[j].setLocation(originalPoses[j].getX() + (difference.getX() * i / 50.0), originalPoses[j].getY() + (difference.getY() * i / 50.0));
+                }
+                pause(speed/50.0);
             }
-            pause(speed);
+        }
+        else{
+            for (int i = 0; i < speed; i++) {
+                for (int j = 0; j < toMove.length; j++) {
+                    toMove[j].setLocation(originalPoses[j].getX() + (difference.getX() * i / speed), originalPoses[j].getY() + (difference.getY() * i / speed));
+                }
+                pause(1);
+            }
+        }
+        for (int j = 0; j < toMove.length; j++) {
+            toMove[j].setLocation(originalPoses[j].getX() + (difference.getX()), originalPoses[j].getY() + (difference.getY()));
         }
     }
 }
