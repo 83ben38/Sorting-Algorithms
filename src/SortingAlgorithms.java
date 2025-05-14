@@ -3,9 +3,7 @@ import acm.graphics.GPoint;
 import acm.program.GraphicsProgram;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class SortingAlgorithms extends GraphicsProgram {
@@ -39,10 +37,12 @@ public class SortingAlgorithms extends GraphicsProgram {
         shuffle();
         heapSort();
         shuffle();
-        radixSort();
+        radixSort1();
+        shuffle();
+        radixSort2();
     }
-    public void radixSort(){
-        title.setLabel("Radix Sort");
+    public void radixSort1(){
+        title.setLabel("Radix Sort LSD");
         add(title, getWidth()/2 - title.getWidth()/2, 100);
         int max = 0;
         for (NumberSquare ns : squares) {
@@ -77,6 +77,51 @@ public class SortingAlgorithms extends GraphicsProgram {
                 indexToGoTo++;
             }
         }
+    }
+    public void radixSort2(){
+        title.setLabel("Radix Sort MSD");
+        add(title, getWidth()/2 - title.getWidth()/2, 100);
+        int max = 0;
+        for (NumberSquare ns : squares) {
+            max = Math.max(max, ns.value);
+        }
+        int maxBits = Integer.toBinaryString(max).length();
+        radixSort2(0,squares.length-1,maxBits-1);
+    }
+    public void radixSort2(int start, int end, int bitNum){
+        if (bitNum == -1 || start >= end){
+            return;
+        }
+        Queue<NumberSquare> zeros = new LinkedList<>();
+        Queue<NumberSquare> ones = new LinkedList<>();
+        for (int j = start; j <= end; j++) {
+            int value = (squares[j].value>>bitNum)&1;
+            if (value == 1){
+                ones.add(squares[j]);
+                move(squares[j],squares[j].getLocation(),new GPoint(squares[j].getX(),squares[j].getY() - squares[j].getHeight()*3/2));
+            }
+            else{
+                zeros.add(squares[j]);
+                move(squares[j],squares[j].getLocation(),new GPoint(squares[j].getX(),squares[j].getY() + squares[j].getHeight()*3/2));
+            }
+        }
+
+        int indexToGoTo = start;
+        while (!zeros.isEmpty()){
+            NumberSquare ns = zeros.poll();
+            move(ns,ns.getLocation(),new GPoint(getWidth()*(indexToGoTo+2)/(numSquares + 3) - ns.getWidth()/2,getHeight()/2-ns.getHeight()/2));
+            squares[indexToGoTo] = ns;
+            indexToGoTo++;
+        }
+        int numToSort = indexToGoTo;
+        while (!ones.isEmpty()){
+            NumberSquare ns = ones.poll();
+            move(ns,ns.getLocation(),new GPoint(getWidth()*(indexToGoTo+2)/(numSquares + 3) - ns.getWidth()/2,getHeight()/2-ns.getHeight()/2));
+            squares[indexToGoTo] = ns;
+            indexToGoTo++;
+        }
+        radixSort2(start,numToSort-1,bitNum-1);
+        radixSort2(numToSort,end,bitNum-1);
     }
     public void heapSort() {
         title.setLabel("Heap Sort");
