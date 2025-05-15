@@ -12,7 +12,7 @@ public class SortingAlgorithms extends GraphicsProgram {
     int speed = 10;
     int defaultSpeed = Math.max(2000/numSquares,1);
     public static int numSquares = 31;
-    boolean doSlowSorts = false;
+    boolean doSlowSorts = true;
     @Override
     public void run() {
         for (int i = 0; i < numSquares; i++) {
@@ -23,6 +23,7 @@ public class SortingAlgorithms extends GraphicsProgram {
         add(title,getWidth()/2-title.getWidth()/2,100);
         title.setFont(new Font(Font.DIALOG,Font.BOLD,32));
         if (doSlowSorts) {
+            defaultSpeed /= 4;
             shuffle();
             selectionSort();
             shuffle();
@@ -30,6 +31,7 @@ public class SortingAlgorithms extends GraphicsProgram {
             shuffle();
             bubbleSort();
         }
+        defaultSpeed *= 4;
         shuffle();
         quickSort();
         shuffle();
